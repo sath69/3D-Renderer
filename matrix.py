@@ -8,11 +8,11 @@ class Matrix:
   def projectionMatrix(self,screen):
       fNear = 0.1
       fFar = 1000.0
-      fov = math.pi * 0.5
+      fovValue = math.pi * 0.5
       aspect_ratio = screen.get_height() / screen.get_width()
-      fovRad = 1 / math.tan(fov*0.5)
+      fov = 1 / math.tan(fovValue*0.5)
       q = fFar / (fFar - fNear)
-      matProj = [[aspect_ratio * fovRad,0.0,0.0,0.0],[0.0,fovRad,0.0,0.0],[0.0,0.0,q,1.0],[0.0,0.0,(-fFar * fNear)/(fFar - fNear),0.0]]
+      matProj = [[aspect_ratio * fov,0.0,0.0,0.0],[0.0,fov,0.0,0.0],[0.0,0.0,q,1.0],[0.0,0.0,(-fFar * fNear)/(fFar - fNear),0.0]]
       return matProj
   
   #Perform matrix multiplication 4x4
@@ -37,3 +37,4 @@ class Matrix:
   def xRotation(self, deltaTime):
       rotXMatrix = [[1,0,0,0],[0,math.cos(0.5*deltaTime),math.sin(0.5*deltaTime),0],[0,-math.sin(0.5*deltaTime),math.cos(0.5*deltaTime),0],[0,0,0,1]]
       return rotXMatrix
+
