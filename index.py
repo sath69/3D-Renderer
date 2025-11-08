@@ -84,46 +84,46 @@ while True:
     zRotMatrix = matrix.zRotation(theta)
     xRotMatrix = matrix.xRotation(theta)
     
-    """
+    
     #Render tetrahedron
+    verts = []
     for tri in tetrahedron.triangles:
-
-       #Perform Z axis rotation
-       triRotZ1 = matrix.multiplyMatrix(tri.v1, zRotMatrix)
-       triRotZ2 = matrix.multiplyMatrix(tri.v2, zRotMatrix)
-       triRotZ3 = matrix.multiplyMatrix(tri.v3, zRotMatrix)
-
-       #Perform Y axis rotation
-       triRotZX1 = matrix.multiplyMatrix(triRotZ1, xRotMatrix)
-       triRotZX2 = matrix.multiplyMatrix(triRotZ2, xRotMatrix)
-       triRotZX3 = matrix.multiplyMatrix(triRotZ3, xRotMatrix)
-
-       #Projection
-       v1 = matrix.multiplyMatrix(triRotZX1.translate_z(triRotZX1,3), projectionMatrix)
-       v2 = matrix.multiplyMatrix(triRotZX2.translate_z(triRotZX2,3), projectionMatrix)
-       v3 = matrix.multiplyMatrix(triRotZX3.translate_z(triRotZX3,3), projectionMatrix)
+        
+        verts.extend([
+            [tri.v1.x, tri.v1.y, tri.v1.z, 1.0],
+            [tri.v2.x, tri.v2.y, tri.v2.z, 1.0],
+            [tri.v3.x, tri.v3.y, tri.v3.z, 1.0]])
+    verts = np.array(verts, dtype=np.float32)
        
-       triangleProjected = Triangle(v1,v2,v3)
-
-       #Scale the triangles into view
-       triangleProjected.v1.x += 0.8
-       triangleProjected.v1.y += 0.8
-       triangleProjected.v2.x += 0.8
-       triangleProjected.v2.y += 0.8
-       triangleProjected.v3.x += 0.8
-       triangleProjected.v3.y += 0.8
-
-       triangleProjected.v1.x *= 0.5 * screen.get_width() 
-       triangleProjected.v1.y *= 0.5 * screen.get_height()
-       triangleProjected.v2.x *=  0.5 * screen.get_width() 
-       triangleProjected.v2.y *= 0.5 * screen.get_height()
-       triangleProjected.v3.x *=  0.5 * screen.get_width() 
-       triangleProjected.v3.y *= 0.5 * screen.get_height()
-
-       #Draw triangle
-       pygame.draw.polygon(screen, (0, 200, 255), [(triangleProjected.v1.x, triangleProjected.v1.y), (triangleProjected.v2.x, triangleProjected.v2.y), (triangleProjected.v3.x, triangleProjected.v3.y)], 2) 
        
-    """
+    #Perform Z axis rotation
+    triRotZ = multiplyMatrix(verts, zRotMatrix)
+       
+    #Perform X axis rotation
+    triRotZX = multiplyMatrix(triRotZ, xRotMatrix)
+    triRotZX[:, 2] += 3.0
+    
+    #Projection
+    triangleProjected = multiplyMatrix(triRotZX, projectionMatrix)
+       
+    #Scale the triangles into view
+    triangleProjected[:, 0] += 0.8
+    triangleProjected[:, 1] += 0.8
+
+    triangleProjected[:,0] *= 0.25 * screen.get_width() 
+    triangleProjected[:, 1] *= 0.25 * screen.get_height()
+
+    #Draw triangle
+    for i in range(0, len(triangleProjected), 3):
+          vertices = [
+            (int(triangleProjected[i][0]), int(triangleProjected[i][1])),
+            (int(triangleProjected[i+1][0]), int(triangleProjected[i+1][1])),
+            (int(triangleProjected[i+2][0]), int(triangleProjected[i+2][1]))
+          ]
+          pygame.draw.polygon(screen, (0, 200, 255), vertices, 2)
+        
+       
+    
     #Render cube
     verts = []
     for tri in cube.triangles:
@@ -137,7 +137,7 @@ while True:
     #Perform Z axis rotation
     triRotZ = multiplyMatrix(verts, zRotMatrix)
        
-    #Perform Y axis rotation
+    #Perform X axis rotation
     triRotZX = multiplyMatrix(triRotZ, xRotMatrix)
        
     triRotZX[:, 2] += 3.0
@@ -151,7 +151,7 @@ while True:
     triangleProjected[:,0] *= 0.5 * screen.get_width() 
     triangleProjected[:, 1] *= 0.5 * screen.get_height()
 
-    #Draw Triangle 
+    #Draw triangle 
     for i in range(0, len(triangleProjected), 3):
         vertices = [
             (int(triangleProjected[i][0]), int(triangleProjected[i][1])),
